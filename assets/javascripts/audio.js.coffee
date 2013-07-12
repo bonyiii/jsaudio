@@ -52,32 +52,3 @@ jQuery ->
   window.audio2 = document.getElementsByTagName("audio")[1]
   player = new Player(10)
   player.play()
-  #audio1.load()
-  #audio1.play()
-  #audio.pause()
-  
-  #$display = $("#display-samples")
-  #lines = []
-  #window.writeSamples = (event) ->
-  #  lines.push "#{event.frameBuffer[0]}, #{event.frameBuffer[1]}, #{event.frameBuffer[2]}"
-  #  lines.shift() if lines.length > 20
-  #  $display.html(lines.join("<br>"))
-
-  #audio.addEventListener("MozAudioAvailable", writeSamples, false)
-
-  #vol = 1
-  #interval = 600
-
-  #fadeout = setInterval ->
-  #  if vol > 0
-  #    vol -= 0.05
-  #    vol = if vol < 0 then 0 else vol
-  #    audio1.volume = vol
-  #  else
-  #    clearInterval(fadeout)
-  #  if vol < 0.4 && audio2.paused
-  #    console.log "audio2 start was called"
-  #    audio2.volume = 1
-  #    audio2.play()
-  #  console.log "#{vol} #{fadeout}"
-  #, interval
