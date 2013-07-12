@@ -23,15 +23,14 @@ class @Player
   setFadeout: =>
     #console.log("#{@fadeingOut} #{@current.duration - @current.currentTime} <= #{@fadeoutTime}")
     return if @fadeingOut
-    if @current.duration - @current.currentTime <= @fadeoutTime + 40
+    if @current.duration - @current.currentTime <= @fadeoutTime
       @fadeingOut = true
       @doFadeout()
-      console.log("#{@current.currentTime} fadeout started")
 
    doFadeout: ->
-     interval = 1 * @second #@current.volume * 100 / @fadeoutTime
-     volumeStep = 0.1
-     console.log "Fadeout should start"
+     interval = 1 * @second
+     volumeStep = (@current.volume * 100 / @fadeoutTime) / 100
+     console.log "volumeStep: #{volumeStep} interval: #{interval / @second} fadeoutTime: #{@fadeoutTime}"
      fadeout = setInterval =>
         if @current.volume > 0
           if @current.volume - volumeStep < 0
@@ -41,6 +40,8 @@ class @Player
           console.log "Decreasing volume by #{volumeStep}"
         else
           clearInterval(fadeout)
+          @fadeingOut = false
+          console.log "Fadout finished"
         if @current.volume < 0.5 && @next.paused
           @next.play()
       , interval
@@ -49,7 +50,7 @@ class @Player
 jQuery ->
   window.audio1 = document.getElementsByTagName("audio")[0]
   window.audio2 = document.getElementsByTagName("audio")[1]
-  player = new Player()
+  player = new Player(10)
   player.play()
   #audio1.load()
   #audio1.play()
