@@ -1,8 +1,9 @@
 class @Player
   constructor: (fadeoutTime = 10, fadeinTime = 2) ->
     @second = 1000
-    @fadeoutTime = fadeoutTime * second
-    @fadeinTime = fadeinTime * second
+    @fadeingOut = false
+    @fadeoutTime = fadeoutTime
+    @fadeinTime = fadeinTime
     @current = window.audio1
     @next = window.audio2
 
@@ -14,36 +15,48 @@ class @Player
       @current = window.audio1
       @next = window.audio2
 
-  initPlay: ->
+  play: ->
+    @current.volume = 1
     @current.play()
-    @current.addEventListener("MozAudioAvailable", @setFadout, false)
+    @current.addEventListener("MozAudioAvailable", @setFadeout, false)
 
-  setFadeout: ->
+  setFadeout: =>
+    #console.log("#{@fadeingOut} #{@current.duration - @current.currentTime} <= #{@fadeoutTime}")
     return if @fadeingOut
-    if @current.duration - audio.currentTime <= @fadoutTime * second
-      interval = @fadeoutTime / 20 
+    if @current.duration - @current.currentTime <= @fadeoutTime + 40
       @fadeingOut = true
-      fadout = setInterval ->
-        if vol > 0
-          vol -= 0.05
-          vol = if vol < 0 then 0 else vol
-          @current.volume = vol
+      @doFadeout()
+      console.log("#{@current.currentTime} fadeout started")
+
+   doFadeout: ->
+     interval = 1 * @second #@current.volume * 100 / @fadeoutTime
+     volumeStep = 0.1
+     console.log "Fadeout should start"
+     fadeout = setInterval =>
+        if @current.volume > 0
+          if @current.volume - volumeStep < 0
+            @current.volume = 0
+          else
+            @current.volume -= volumeStep
+          console.log "Decreasing volume by #{volumeStep}"
         else
           clearInterval(fadeout)
-        if vol < 0.5 && audio2.paused
-          audio2.play()
+        if @current.volume < 0.5 && @next.paused
+          @next.play()
       , interval
 
 
 jQuery ->
   window.audio1 = document.getElementsByTagName("audio")[0]
   window.audio2 = document.getElementsByTagName("audio")[1]
-  audio1.load()
-  audio1.play()
+  player = new Player()
+  player.play()
+  #audio1.load()
+  #audio1.play()
   #audio.pause()
-  $display = $("#display-samples")
-  lines = []
-
+  
+  #$display = $("#display-samples")
+  #lines = []
   #window.writeSamples = (event) ->
   #  lines.push "#{event.frameBuffer[0]}, #{event.frameBuffer[1]}, #{event.frameBuffer[2]}"
   #  lines.shift() if lines.length > 20
