@@ -20,31 +20,47 @@ class @Player
     @current.play()
     @current.addEventListener("MozAudioAvailable", @setFadeout, false)
 
+  pause: ->
+    @current.pause()
+
   setFadeout: =>
     #console.log("#{@fadeingOut} #{@current.duration - @current.currentTime} <= #{@fadeoutTime}")
-    return if @fadeingOut
     if @current.duration - @current.currentTime <= @fadeoutTime
-      @fadeingOut = true
-      @doFadeout()
+      @playNext()
 
-   doFadeout: ->
-     interval = 1 * @second
-     volumeStep = (@current.volume * 100 / @fadeoutTime) / 100
-     console.log "volumeStep: #{volumeStep} interval: #{interval / @second} fadeoutTime: #{@fadeoutTime}"
-     fadeout = setInterval =>
-        if @current.volume > 0
-          if @current.volume - volumeStep < 0
-            @current.volume = 0
-          else
-            @current.volume -= volumeStep
-          console.log "Decreasing volume by #{volumeStep}"
+  playNext: ->
+    if @fadeingOut
+      console.log("Fadeing out already, bro")
+      return
+    #@fadeoutStarted = new Date.getTime() / @second
+    @fadeingOut = true
+    @doFadeout()
+
+  doFadeout: ->
+    interval = 1 * @second
+    volumeStep = (@current.volume * 100 / @fadeoutTime) / 100
+    console.log "volumeStep: #{volumeStep} interval: #{interval / @second} fadeoutTime: #{@fadeoutTime}"
+    fadeout = setInterval =>
+      if @current.volume > 0
+        if @current.volume - volumeStep < 0
+          @current.volume = 0
         else
-          clearInterval(fadeout)
-          @fadeingOut = false
-          console.log "Fadout finished"
-        if @current.volume < 0.5 && @next.paused
-          @next.play()
-      , interval
+          @current.volume -= volumeStep
+        console.log "Decreasing volume by #{volumeStep}"
+      else
+        @finishFadeout(fadeout)
+      if @current.volume < 0.5 && @next.paused
+        @next.volume = 1
+        @next.play()
+    , interval
+
+  finishFadeout: (fadeoutInterval) ->
+    clearInterval(fadeoutInterval)
+    @fadeingOut = false
+    @current.pause()
+    @switchPlayer()
+    console.log "Fadeout finished"
+
 
 
 jQuery ->
@@ -52,3 +68,30 @@ jQuery ->
   window.audio2 = document.getElementsByTagName("audio")[1]
   player = new Player(10)
   player.play()
+  $('#play-next').on 'click', ->
+    player.playNext()
+  $('#play').on 'click', ->
+    player.play()
+  $('#pause').on 'click', ->
+    player.pause()
+
+    #  doFadeout: ->
+    #    interval = 1 * @second
+    #    volumeStep = (@current.volume * 100 / @fadeoutTime) / 100
+    #    console.log "volumeStep: #{volumeStep} interval: #{interval / @second} fadeoutTime: #{@fadeoutTime}"
+    #    fadeout = setInterval =>
+    #      currentTime = new Date().getTime() / @second
+    #      console.log "#{@fadeoutStartTime} + #{@fadeoutTime} <= #{currentTime} + #{@fadeinTime}"
+    #      if @current.volume > 0
+    #        if @current.volume - volumeStep < 0
+    #          @current.volume = 0
+    #        else
+    #          @current.volume -= volumeStep
+    #        console.log "Decreasing volume by #{volumeStep}"
+    #      else
+    #        @finishFadeout(fadeout)
+    #      if @fadeoutStartTime + @fadeoutTime <= currentTime + @fadeinTime  && @next.paused
+    #        @next.volume = 1
+    #        @next.play()
+    #    , interval
+    #
