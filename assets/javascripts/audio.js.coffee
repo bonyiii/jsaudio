@@ -5,20 +5,22 @@ class @Player
     @fadeoutTime = fadeoutTime
     @fadeinTime = fadeinTime
     @current = window.audio1
+    @current.addEventListener("MozAudioAvailable", @setFadeout, false)
     @next = window.audio2
 
   switchPlayer: ->
+    # http://stackoverflow.com/questions/4402287/javascript-remove-event-listener
+    @current.removeEventListener("MozAudioAvailable", @setFadeout)
     if @current == window.audio1
       @current = window.audio2
       @next = window.audio1
     else
       @current = window.audio1
       @next = window.audio2
+    @current.addEventListener("MozAudioAvailable", @setFadeout, false)
 
   play: ->
-    @current.volume = 1
     @current.play()
-    @current.addEventListener("MozAudioAvailable", @setFadeout, false)
 
   pause: ->
     @current.pause()
@@ -26,12 +28,11 @@ class @Player
   setFadeout: =>
     #console.log("#{@fadeingOut} #{@current.duration - @current.currentTime} <= #{@fadeoutTime}")
     if @current.duration - @current.currentTime <= @fadeoutTime
-      @playNext()
+      @playNext({auto: true})
 
-  playNext: ->
-    if @fadeingOut
-      console.log("Fadeing out already, bro")
-      return
+  playNext: (obj = {}) ->
+    console.log("Fadeing out already, bro") unless obj.auto
+    return if @fadeingOut
     #@fadeoutStarted = new Date.getTime() / @second
     @fadeingOut = true
     @doFadeout()
