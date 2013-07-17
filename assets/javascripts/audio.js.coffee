@@ -43,6 +43,7 @@ class @Player
     @volume = @current.volume
     @fadeingOut = true
     @doFadeout()
+    @iterator = 0
 
   doFadeout: ->
     interval = 1 * @second
@@ -55,13 +56,14 @@ class @Player
         else
           @current.volume -= volumeStep
         #console.log "Decreasing volume by #{volumeStep}"
-      console.log "#{@fadeoutStarted} + #{@fadeoutTime} <= #{@now()} + #{@fadeinTime}"
       if @fadeoutStarted + @fadeoutTime <= @now() + @fadeinTime && @next.paused
         @next.volume = @volume
         console.log("start playing on next #{@next.id}")
         @next.play()
-      console.log("next: #{@next.id}")
       @finishFadeout(fadeout) if @current.volume == 0
+      console.log "#{@fadeoutStarted} + #{@fadeoutTime} <= #{@now()} + #{@fadeinTime}"
+      console.log("iterator: #{@iterator}")
+      @iterator += 1
     , interval
 
   finishFadeout: (fadeoutInterval) ->
@@ -72,11 +74,10 @@ class @Player
     console.log "Fadeout finished"
 
 
-
 jQuery ->
   window.audio1 = document.getElementsByTagName("audio")[0]
   window.audio2 = document.getElementsByTagName("audio")[1]
-  player = new Player(5, 2)
+  player = new Player(10, 2)
   player.play()
   $('#play-next').on 'click', ->
     player.playNext()
@@ -84,24 +85,3 @@ jQuery ->
     player.play()
   $('#pause').on 'click', ->
     player.pause()
-
-    #  doFadeout: ->
-    #    interval = 1 * @second
-    #    volumeStep = (@current.volume * 100 / @fadeoutTime) / 100
-    #    console.log "volumeStep: #{volumeStep} interval: #{interval / @second} fadeoutTime: #{@fadeoutTime}"
-    #    fadeout = setInterval =>
-    #      currentTime = new Date().getTime() / @second
-    #      console.log "#{@fadeoutStartTime} + #{@fadeoutTime} <= #{currentTime} + #{@fadeinTime}"
-    #      if @current.volume > 0
-    #        if @current.volume - volumeStep < 0
-    #          @current.volume = 0
-    #        else
-    #          @current.volume -= volumeStep
-    #        console.log "Decreasing volume by #{volumeStep}"
-    #      else
-    #        @finishFadeout(fadeout)
-    #      if @fadeoutStartTime + @fadeoutTime <= currentTime + @fadeinTime  && @next.paused
-    #        @next.volume = 1
-    #        @next.play()
-    #    , interval
-    #
