@@ -6,6 +6,7 @@ class @Player
     @fadeinTime = fadeinTime
     @current = window.audio1
     @current.addEventListener("MozAudioAvailable", @setFadeout, false)
+    @volume = @current.volume
     @next = window.audio2
 
   switchPlayer: ->
@@ -25,15 +26,21 @@ class @Player
   pause: ->
     @current.pause()
 
+  now: ->
+    date = new Date()
+    date.getTime() / @second
+
   setFadeout: =>
     #console.log("#{@fadeingOut} #{@current.duration - @current.currentTime} <= #{@fadeoutTime}")
     if @current.duration - @current.currentTime <= @fadeoutTime
       @playNext({auto: true})
 
   playNext: (obj = {}) ->
-    console.log("Fadeing out already, bro") unless obj.auto
-    return if @fadeingOut
-    #@fadeoutStarted = new Date.getTime() / @second
+    if @fadeingOut
+      console.log("Fadeing out already, bro") unless obj.auto
+      return 
+    @fadeoutStarted = @now()
+    @volume = @current.volume
     @fadeingOut = true
     @doFadeout()
 
@@ -47,12 +54,14 @@ class @Player
           @current.volume = 0
         else
           @current.volume -= volumeStep
-        console.log "Decreasing volume by #{volumeStep}"
-      else
-        @finishFadeout(fadeout)
-      if @current.volume < 0.5 && @next.paused
-        @next.volume = 1
+        #console.log "Decreasing volume by #{volumeStep}"
+      console.log "#{@fadeoutStarted} + #{@fadeoutTime} <= #{@now()} + #{@fadeinTime}"
+      if @fadeoutStarted + @fadeoutTime <= @now() + @fadeinTime && @next.paused
+        @next.volume = @volume
+        console.log("start playing on next #{@next.id}")
         @next.play()
+      console.log("next: #{@next.id}")
+      @finishFadeout(fadeout) if @current.volume == 0
     , interval
 
   finishFadeout: (fadeoutInterval) ->
@@ -67,7 +76,7 @@ class @Player
 jQuery ->
   window.audio1 = document.getElementsByTagName("audio")[0]
   window.audio2 = document.getElementsByTagName("audio")[1]
-  player = new Player(10)
+  player = new Player(5, 2)
   player.play()
   $('#play-next').on 'click', ->
     player.playNext()
