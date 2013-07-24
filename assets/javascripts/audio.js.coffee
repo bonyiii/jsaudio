@@ -77,7 +77,7 @@ class @Player
 jQuery ->
   window.audio1 = document.getElementsByTagName("audio")[0]
   window.audio2 = document.getElementsByTagName("audio")[1]
-  player = new Player(10, 2)
+  player = new Player(10, 10)
   player.play()
   $('#play-next').on 'click', ->
     player.playNext()
