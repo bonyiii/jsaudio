@@ -3,21 +3,31 @@ class @Player
     @ui = new UI(@)
     @second = 1000
     @fadeingOut = false
-    @current = window.audio1
+    @audio1 = window.audio1 # new Audio()
+    @audio2 = window.audio2 # new Audio()
+
+    @current = @audio1
     @current.addEventListener("timeupdate", @timeTrack, false)
     @volume = @current.volume
     @ui.updateVolumeBar(@volume * 100)
-    @next = window.audio2
+    @next = @audio2
+
+  setup: (obj) ->
+    if obj.hasOwnProperty("tracklist")
+      @tracklist = new Tracklist
+      @tracklist.add(new Track(track)) for track in obj.tracklist
+      @current.src = @tracklist.current().srcOgg
+      @next.src = @tracklist.next().srcOgg
 
   switchPlayer: ->
     # http://stackoverflow.com/questions/4402287/javascript-remove-event-listener
     @current.removeEventListener("timeupdate", @timeTrack)
-    if @current == window.audio1
-      @current = window.audio2
-      @next = window.audio1
+    if @current == @audio1
+      @current = @audio2
+      @next = @audio1
     else
-      @current = window.audio1
-      @next = window.audio2
+      @current = @audio1
+      @next = @audio2
     @current.addEventListener("timeupdate", @timeTrack, false)
 
   play: ->
@@ -104,10 +114,18 @@ class @Player
     @fadeingOut = false
     @current.pause()
     @switchPlayer()
+    if @tracklist.step()
+      @next.src = @tracklist.next().srcOgg
+    console.log "current #{@current.src}"
+    console.log "next #{@next.src}"
     console.log "Fadeout finished"
 
 jQuery ->
+  track1 = new Track({ name: "Nice 1", srcOgg: "/music/egy.ogg" })
+  track2 = new Track({ name: "Nice 2", srcOgg: "/music/ketto.ogg" })
+  track3 = new Track({ name: "Nice 2", srcOgg: "/music/harom.ogg" })
   window.audio1 = document.getElementsByTagName("audio")[0]
   window.audio2 = document.getElementsByTagName("audio")[1]
-  window.player = new Player(10, 10)
+  window.player = new Player(5, 2)
+  window.player.setup(tracklist: [ track1, track2, track3 ])
   window.player.play()
