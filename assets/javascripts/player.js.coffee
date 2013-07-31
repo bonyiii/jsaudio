@@ -69,7 +69,7 @@ class @Player
     interval = 1 * @second
     volumeStep = (@current.volume * 100 / @fadeoutTime) / 100
     #console.log "volumeStep: #{volumeStep} interval: #{interval / @second} fadeoutTime: #{@fadeoutTime}"
-    fadeout = setInterval =>
+    @fadeout = setInterval =>
       if @current.volume > 0
         if @current.volume - volumeStep < 0
           @current.volume = 0
@@ -80,14 +80,14 @@ class @Player
         @next.volume = @volume
         console.log("start playing on next #{@next.id}")
         @next.play()
-      @finishFadeout(fadeout) if @current.volume == 0
+      @finishFadeout() if @current.volume == 0
       #console.log "#{@fadeoutStarted} + #{@fadeoutTime} <= #{@now()} + #{@fadeinTime}"
       #console.log("iterator: #{@iterator}")
       #@iterator += 1
     , interval
 
-  finishFadeout: (fadeoutInterval) ->
-    clearInterval(fadeoutInterval)
+  finishFadeout: () ->
+    clearInterval(@fadeout)
     @fadeingOut = false
     @current.pause()
     @switchPlayer()

@@ -49,7 +49,6 @@ class @UI
      @$mute.removeClass("icon-volume-off") 
      @$mute.addClass("icon-volume-up") 
 
-
   buttonListener: ->
     @$play.on 'click', =>
       @player.play()
