@@ -1,28 +1,17 @@
 class @UI
-  constructor: ->
+  constructor: (@player) ->
+    @dom()
+    @listeners()
+
+  dom: ->
     @$progressBar = $('.music-player progress.progress')
     @$play = $('.music-player .icon-play')
     @$pause = $('.music-player .icon-pause')
-    @$play.on 'click', =>
-      @play()
-    @$pause.on 'click', =>
-      @pause()
-    $('.music-player .icon-forward').on 'click', =>
-      @playNext()
-    timeDrag = false
+    @$ff = $('.music-player .icon-forward')
 
-    @$progressBar.mousedown (e) => 
-      timeDrag = true
-      @updateBar(e.pageX)
-    $(document).mouseup (e) =>
-      if !!timeDrag
-        timeDrag = false
-        @updateBar(e.pageX)
-    $(document).mousemove (e) =>
-      @updateBar(e.pageX) if !!timeDrag
 
   # http://www.inwebson.com/html5/custom-html5-video-controls-with-jquery/
-  updateBar: (x) ->
+  seek: (x) ->
     position = x - @$progressBar.offset().left
     percentage  = 100 * position / @$progressBar.width()
 
@@ -31,5 +20,42 @@ class @UI
       @pause()
     if (percentage < 0)
       percentage = 0
-    @current.currentTime = @current.duration * (percentage / 100)
+    @player.current.currentTime = @player.current.duration * (percentage / 100)
+    @updateProgressBar(percentage)
+
+  updateProgressBar: (percentage) ->
     @$progressBar.val(percentage)
+
+  playButton: (status) ->
+    switch status
+      when "pause"
+        @$play.removeClass("hide")
+        @$pause.addClass("hide")
+      when "play"
+        @$pause.removeClass("hide")
+        @$play.addClass("hide")
+
+  listeners: ->
+    @buttonListener()
+    @progressBarListener()
+
+  buttonListener: ->
+    @$play.on 'click', =>
+      @player.play()
+    @$pause.on 'click', =>
+      @player.pause()
+    @$ff.on 'click', =>
+      @player.playNext()
+
+  progressBarListener: ->
+    timeDrag = false
+
+    @$progressBar.mousedown (e) => 
+      timeDrag = true
+      @seek(e.pageX)
+    $(document).mouseup (e) =>
+      if !!timeDrag
+        timeDrag = false
+        @seek(e.pageX)
+    $(document).mousemove (e) =>
+      @seek(e.pageX) if !!timeDrag
