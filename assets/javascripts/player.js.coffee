@@ -31,6 +31,8 @@ class @Player
   seek: (percentage) ->
     @current.currentTime = @current.duration * (percentage / 100)
     @ui.updateProgressBar(percentage)
+    if !@shouldFadeout() && @current.duration != @current.currentTime
+      @resetFadeout()
 
   toggleMute: ->
     @current.muted = !@current.muted
@@ -48,11 +50,14 @@ class @Player
     date = new Date()
     date.getTime() / @second
 
+  shouldFadeout: ->
+    @current.duration - @current.currentTime <= @fadeoutTime 
+
   timeTrack: =>
     percentage = ((@current.currentTime / @current.duration) * 100)
     @ui.updateProgressBar(percentage)
     #console.log("#{@fadeingOut} #{@current.duration - @current.currentTime} <= #{@fadeoutTime}")
-    if @current.duration - @current.currentTime <= @fadeoutTime
+    if @shouldFadeout()
       @playNext({auto: true})
 
   playNext: (obj = {}) ->
@@ -80,11 +85,19 @@ class @Player
         @next.volume = @volume
         console.log("start playing on next #{@next.id}")
         @next.play()
-      @finishFadeout() if @current.volume == 0
+      @finishFadeout() if @current.volume == 0 || @current.duration == @current.currentTime
       #console.log "#{@fadeoutStarted} + #{@fadeoutTime} <= #{@now()} + #{@fadeinTime}"
       #console.log("iterator: #{@iterator}")
       #@iterator += 1
     , interval
+
+  resetFadeout: ->
+    clearInterval(@fadeout)
+    @fadeingOut = false
+    @next.pause()
+    @next.currentTime = 0
+    @current.volume = @volume 
+    @current.play()
 
   finishFadeout: () ->
     clearInterval(@fadeout)

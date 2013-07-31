@@ -19,10 +19,9 @@ class @UI
   # http://www.inwebson.com/html5/custom-html5-video-controls-with-jquery/
   seek: (x) ->
     position = x - @$progressBar.offset().left
-    percentage  = 100 * position / @$progressBar.width()
+    percentage = 100 * position / @$progressBar.width()
     if (percentage > 100)
       percentage = 100
-      @pause()
     if (percentage < 0)
       percentage = 0
     @player.seek(percentage)
