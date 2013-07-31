@@ -4,20 +4,21 @@ class @Player
     @second = 1000
     @fadeingOut = false
     @current = window.audio1
-    @current.addEventListener("MozAudioAvailable", @timeTrack, false)
+    @current.addEventListener("timeupdate", @timeTrack, false)
     @volume = @current.volume
+    @ui.updateVolumeBar(@volume * 100)
     @next = window.audio2
 
   switchPlayer: ->
     # http://stackoverflow.com/questions/4402287/javascript-remove-event-listener
-    @current.removeEventListener("MozAudioAvailable", @timeTrack)
+    @current.removeEventListener("timeupdate", @timeTrack)
     if @current == window.audio1
       @current = window.audio2
       @next = window.audio1
     else
       @current = window.audio1
       @next = window.audio2
-    @current.addEventListener("MozAudioAvailable", @timeTrack, false)
+    @current.addEventListener("timeupdate", @timeTrack, false)
 
   play: ->
     @current.play()
@@ -26,6 +27,22 @@ class @Player
   pause: ->
     @current.pause()
     @ui.playButton("pause")
+
+  seek: (percentage) ->
+    @current.currentTime = @current.duration * (percentage / 100)
+    @ui.updateProgressBar(percentage)
+
+  toggleMute: ->
+    @current.muted = !@current.muted
+    value = if @current.muted then 0 else @current.volume * 100
+    @ui.muteButton(@current.muted)
+    @ui.updateVolumeBar(value)
+    # return true instead of jquery dom element
+    true
+
+  setVolume: (percentage) ->
+    @current.volume = percentage / 100
+    @ui.updateVolumeBar(percentage)
 
   now: ->
     date = new Date()
@@ -79,5 +96,5 @@ class @Player
 jQuery ->
   window.audio1 = document.getElementsByTagName("audio")[0]
   window.audio2 = document.getElementsByTagName("audio")[1]
-  player = new Player(10, 10)
-  player.play()
+  window.player = new Player(10, 10)
+  window.player.play()
