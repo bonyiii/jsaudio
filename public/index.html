@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="stylesheet" href="assets/app.css" type="text/css">
+  <link rel="stylesheet" href="assets/player.css" type="text/css">
   <script type="text/javascript">
     document.write("\<script src='//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js' type='text/javascript'>\<\/script>");
   </script>
-  <script src="assets/app.js"></script>
+  <script src="assets/player.js"></script>
+  <script src="assets/tracklist.js"></script>
 </head>
 <body>
   <p>Hello world!</p>
@@ -19,14 +20,8 @@
 
   <canvas id="waves" width="512" height="200"></canvas>
   <pre id="display-samples"></pre>
-  <button id="play-next">Play Next</button>
-  <button id="play">Play</button>
-  <button id="pause">Pause</button>
 
   <div class='music-player idle'>
-    <div class='playlist'>
-      <div class='cover'></div>
-    </div>
     <div class='info'>
       <div class='title'></div>
       <div class='aa'>
